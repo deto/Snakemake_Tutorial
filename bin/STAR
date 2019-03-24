@@ -1,0 +1,8 @@
+#!/bin/bash
+
+out_dir=STAR
+mkdir -p $out_dir
+
+touch $out_dir/results.bam
+
+sleep 2

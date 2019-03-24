@@ -1,0 +1,8 @@
+#!/bin/bash
+
+out_dir=rsem
+mkdir -p $out_dir
+
+touch $out_dir/sample.isoforms.results
+
+sleep 2

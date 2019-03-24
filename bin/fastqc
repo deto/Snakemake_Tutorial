@@ -1,0 +1,8 @@
+#!/bin/bash
+
+out_dir=fastqc
+mkdir -p $out_dir
+
+touch $out_dir/results.html
+
+sleep 2
