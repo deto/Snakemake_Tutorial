@@ -1,3 +1,6 @@
+<style type="text/css" rel="stylesheet">
+img + em {display: block; text-align: center;}
+</style>
 # Snakemake Tutorial
 
 ## Overview
@@ -67,6 +70,12 @@ Using Snakemake involves two components:
 Let's look at simple workflow to get an idea of how this works.
 
 # Exploring a simple workflow
+
+The workflow file can be found in [Example1/Snakefile](Example1/Snakefile).
+
+
+![Our Example Workflow](images/images_example_workflow.png)
+*Our Example Workflow*
 
 # Extending this workflow with {wildcards}
 

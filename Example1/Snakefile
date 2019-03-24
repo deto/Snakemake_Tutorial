@@ -1,0 +1,49 @@
+rule download_data:
+    output:
+        reads="sample1.fastq.gz"
+    shell:
+        """
+        wget https://raw.githubusercontent.com/deto/Snakemake_Tutorial/master/misc/sample1.fastq.gz
+        """
+
+rule fastqc:
+    input:
+        reads=rules.download_data.output
+    output:
+        "fastqc/results.html"
+    shell:
+        """
+        fastqc --outdir="fastqc" {input.reads}
+        """
+
+rule align_reads:
+    input:
+        reads=rules.download_data.output
+    output:
+        "STAR/results.bam"
+    shell:
+        """
+        STAR --genomeDir "/some/directory/to/reference" --readFilesIn {input.reads}
+        """
+
+rule quantify_transcripts:
+    input:
+        bam=rules.align_reads.output
+    output:
+        isoforms="rsem/sample.isoforms.results"
+    shell:
+        """
+        rsem-calculate-expression --alignments {input.bam} rsem/sample
+        """
+
+rule plot_results:
+    input:
+        isoforms=rules.quantify_transcripts.output.isoforms
+    output:
+        plot="plots/my_plot.png"
+    script: "scripts/plot_things.py"
+
+rule all:
+    input:
+        rules.plot_results.output,
+        rules.fastqc.output,
