@@ -1,6 +1,7 @@
 #!/bin/bash
 
-out_dir=STAR
+prefix=$4
+out_dir=$(dirname $prefix)
 mkdir -p $out_dir
 
 touch $out_dir/results.bam

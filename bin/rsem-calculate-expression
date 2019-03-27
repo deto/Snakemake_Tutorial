@@ -1,8 +1,33 @@
-#!/bin/bash
+#!/usr/bin/python
 
-out_dir=rsem
-mkdir -p $out_dir
+# prefix=$3
+# out_dir=$(dirname $prefix)
+# mkdir -p $out_dir
+# 
+# touch $out_dir/sample.isoforms.results
+# 
+# sleep 2
 
-touch $out_dir/sample.isoforms.results
+import sys
+import os
+import random
+import time
 
-sleep 2
+prefix = sys.argv[3]
+out_dir = os.path.dirname(prefix)
+
+try:
+    os.makedirs(out_dir)
+except OSError:
+    pass
+
+out_file = prefix + ".isoforms.results"
+
+with open(out_file, 'w') as fout:
+    for i in range(1000):
+        gene = "gene" + str(i+1)
+        val = random.randint(0, 1000)
+        line = "\t".join([gene, str(val)]) + "\n"
+        fout.write(line)
+
+time.sleep(2)  # slow things down for demo

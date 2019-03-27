@@ -1,6 +1,7 @@
 #!/bin/bash
 
-out_dir=fastqc
+IFS='=' read -ra arg2 <<< $1
+out_dir=${arg2[1]}
 mkdir -p $out_dir
 
 touch $out_dir/results.html
