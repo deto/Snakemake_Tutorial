@@ -1,0 +1,48 @@
+rule fastqc:
+    input:
+        read1="raw_data/{id}_R1.fastq.gz",
+        read2="raw_data/{id}_R2.fastq.gz"
+    output:
+        "{id}/fastqc/results.html"
+    shell:
+        """
+        mkdir -p {wildcards.id}/fastqc
+        fastqc --outdir="{wildcards.id}/fastqc" {input.read1} {input.read2}
+        """
+
+rule align_reads:
+    input:
+        read1="raw_data/{id}_R1.fastq.gz",
+        read2="raw_data/{id}_R2.fastq.gz"
+    output:
+        "{id}/STAR/results.bam"
+    shell:
+        """
+        STAR --genomeDir "/some/directory/to/reference" \
+            --outFileNamePrefix "{wildcards.id}/STAR/results" \
+            --readFilesIn {input.read1} {input.read2}
+        """
+
+rule quantify_transcripts:
+    input:
+        bam=rules.align_reads.output
+    output:
+        isoforms="{id}/rsem/sample.isoforms.results"
+    shell:
+        """
+        rsem-calculate-expression --alignments {input.bam} {wildcards.id}/rsem/sample
+        """
+
+IDs, = glob_wildcards("raw_data/{id}_R1.fastq.gz")
+
+rule gather_results:
+    input:
+        expand(rules.quantify_transcripts.output.isoforms, id=IDs)
+    output:
+        expression="expression.txt"
+    script: "scripts/gather.R"
+
+rule all:
+    input:
+        rules.gather_results.output,
+        expand(rules.fastqc.output, id=IDs)

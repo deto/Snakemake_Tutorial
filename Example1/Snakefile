@@ -1,8 +1,10 @@
 rule download_data:
     output:
-        reads="sample1.fastq.gz"
+        reads="raw_data/sample1.fastq.gz"
     shell:
         """
+        mkdir -p raw_data
+        cd raw_data
         wget https://raw.githubusercontent.com/deto/Snakemake_Tutorial/master/misc/sample1.fastq.gz
         """
 
@@ -23,7 +25,9 @@ rule align_reads:
         "STAR/results.bam"
     shell:
         """
-        STAR --genomeDir "/some/directory/to/reference" --readFilesIn {input.reads}
+        STAR --genomeDir "/some/directory/to/reference" \
+            --outFileNamePrefix "STAR/results" \
+            --readFilesIn {input.reads}
         """
 
 rule quantify_transcripts:
