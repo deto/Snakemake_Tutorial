@@ -5,7 +5,7 @@
 - What does Snakemake do?
 - Exploring a simple workflow
 - Extending this workflow with {wildcards}
-- Advanced Features
+- Tour of other useful features
 
 # What does Snakemake do?
 
@@ -73,6 +73,8 @@ The workflow file can be found in [Example1/Snakefile](Example1/Snakefile).
 *Our Example Workflow*
 ![Our Example Workflow](images/images_example_workflow.png)
 
+## Structure of a Rule
+
 Let's take a look at the Snakefile.  Inside this file, each step is represented by a 'rule'.
 
 The first two rules look like this:
@@ -113,6 +115,8 @@ Rules generally specify:
 
 Inputs and outputs are used by snakemake to determine the order for which rules are to be run.  If a rule B has an input produced as an output of rule A, then rule B will be run after rule A.
 
+## Building a Target Output
+
 We can run this pipeline as an example.  Note, that this is only made to *resemble* a read alignment pipeline for demonstration purposes.  The fastq file is empty and the executables are fake.
 
 To run this, first add these fake executables to your path by running `source install_fake_programs.sh` in the repository root directory.  Don't worry, this is only temporary and it will revert if you open a new terminal.
@@ -130,6 +134,8 @@ Here we are telling it to create the outputs of the fastqc rule, running any oth
 If we run `snakemake fastqc` again, snakemake outputs 'Nothing to be done.' to show that all the necessary files have already been created and no steps need to be re-run.
 
 If you delete the output by running `rm fastqc/results.html`, and then run `snakemake fastqc` again, now the step will be re-run.
+
+## More details on Snakemake Rules
 
 Looking more closely at the `fastqc` rule:
 
@@ -150,7 +156,7 @@ rule fastqc:
 - These files can be referred to in the shell command (or python/R scripts)
 - You can refer to the inputs/outputs of *other* rules like is shown with the input in fastqc above
 
-These last parts are very important as they help you adhere to the DRY (don't repeat yourself) principal.  You could just type in the file names/paths multiple times, wherever needed, but my only entering it once, and then referencing it you can later make changes without having to worry about changing all occurrences of the path.
+These last parts are very important as they help you adhere to the DRY (don't repeat yourself) principal.  You could just type in the file names/paths multiple times, wherever needed, but by only entering it once, and then referencing it you can later make changes without having to worry about changing all occurrences of the path.
 
 Now, you'll notice that snakemake only runs rules that are necessary for the target rule you specify.  Because our pipeline has two outputs on separate branches (the fastqc output and the gene expression plot), I've created a rule `all` which takes both of these as input (and has no output).  This is at the end of the file and is a common convention with snakemake.
 
@@ -163,7 +169,7 @@ rule all:
 
 This lets you run `snakemake all` to build everything.  If we run that now, you'll see that the rules which have been run already are not re-run because they don't need to be.
 
-*Re-running Rules*
+## Re-running Rules
 
 If you make a change and need to re-run a rule, there are a few options:
 
@@ -190,7 +196,7 @@ snakemake all # runs everything else downstream of align_reads
 * `snakemake --reason` or `snakemake -r`
     * output *why* each rule is being run
 
-*Script Files*
+## Script Files
 
 One thing that makes Snakemake useful for data analysis is its native support for Python and R scripts.  Look at the `plot_results` rule from our Example1 pipeline:
 
@@ -254,7 +260,7 @@ And Snakemake sees that the `align_reads` can produce that file.  Then it parses
 The `quantify_transcripts` step runs after the `align_reads` step.  So if you run:
 
 ```
-snakemake S7/rsem/sample.isoforms.results"
+snakemake S7/rsem/sample.isoforms.results
 ```
 
 Snakemake parses S7 as the id, sees that `quantify_transcripts` with id=S7 needs `S7/STAR/results.bam` as an input, then sees that `align_reads` can produce that file and runs it first.
@@ -298,6 +304,8 @@ rule quantify_transcripts_all:
 ```
 
 This is the best option as now we have something that could just as easily work for 100s or 1000s of input files.
+
+## Scaling up runs with many steps
 
 The `gather_results` step does this kind of expansion in the Example2 workflow.  We can run it as a target because its output is just a non-wildcard file.
 
@@ -373,6 +381,21 @@ The open-source contributors of Snakemake have built out many other useful featu
 Inside a snakefile, you can use an `include` command to add in the rules of another workflow.  This let's you split things into multiple files for ease of use and re-useability.
 
 You can also use the `subworkflow` command to have the *input* of a snakemake rule depend on the *output* of a rule in another workflow.  When doing this, the other worklow is run first to create the target before the rule in the current workflow is run.
+
+For example, with our wildcard example workflow above, the final step produces `expression.txt`.  If we had a second workflow that used that file, we could indicate this like so:
+
+```
+subworkflow example2:
+    workdir:
+        "../path/to/otherworkflow"
+
+rule step1:
+    input:
+        otherworkflow("expression.txt")
+```
+
+Here, `step1` in our new workflow will take `expression.txt` as an input.  When this step is run, Snakemake will first consult the example2 workflow and either create or update "expression.txt" as necessary.
+
 
 **Protected and Temporary Files**
 
@@ -455,9 +478,11 @@ For example:
 
 ![My DAG](images/my_workflow.svg)
 
+You can also run Snakemake with the `--gui` flag and you'll get a GUI you can connect to with a web browser to monitor jobs in realtime.
 
 **Report**
 
 Lastly you can decorate outputs with the `report(...)` option to automatically embed plots/tables into an HTML report after running your workflow.
 
-You can also run Snakemake with the `--gui` flag and you'll get a GUI you can connect to with a web browser to monitor jobs in realtime.
+An example (from the Snakemake documentation) can be found [here](https://snakemake.readthedocs.io/en/stable/_downloads/0d83162f139097dbe44946d6637389bc/report.html)
+
