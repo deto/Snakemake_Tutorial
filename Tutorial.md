@@ -121,6 +121,8 @@ We can run this pipeline as an example.  Note, that this is only made to *resemb
 
 To run this, first add these fake executables to your path by running `source install_fake_programs.sh` in the repository root directory.  Don't worry, this is only temporary and it will revert if you open a new terminal.
 
+You'll also need to make sure you have Snakemake installed.  If you already have Python installed (this is the case automatically for most Linux distributions and OSX) then you can install Snakemake simply by running `pip install snakemake` in your terminal.
+
 Now, we can run these rules by first navigating to the `Example1` directory and then executing this command (in BASH):
 
 ```
